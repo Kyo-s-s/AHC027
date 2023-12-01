@@ -72,7 +72,7 @@ impl IO {
         Self { n, map, d }
     }
 
-    // 枠外に出る場合もここで判定されている
+    // 枠外に出る場合もここで判定
     pub fn check(&self, i: usize, j: usize, d: Direction) -> bool {
         self.map[i][j] & (1 << d as u8) != 0
     }

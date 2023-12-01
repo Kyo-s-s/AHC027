@@ -46,6 +46,10 @@ impl Solver {
     }
 }
 
+// Vec<Vec<usize>> で、 (i, j) に x 回(うまくならして)訪れるようなルートの貪欲 を求めるようにして、
+// この x 回訪れる パートを焼く...など...？
+// ルート長さを 5000 とすると 1000回くらいは焼けそう、もっと焼きたいけど
+
 fn main() {
     let io = IO::new();
     let mut solver = Solver::new(io);
