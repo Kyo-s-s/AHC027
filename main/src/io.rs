@@ -56,12 +56,23 @@ impl IO {
                     }
                 }
             }
+
+            for j in 0..n {
+                map[0][j] &= !(1 << Direction::U as u8);
+                map[n - 1][j] &= !(1 << Direction::D as u8);
+            }
+
+            for i in 0..n {
+                map[i][0] &= !(1 << Direction::L as u8);
+                map[i][n - 1] &= !(1 << Direction::R as u8);
+            }
             map
         };
 
         Self { n, map, d }
     }
 
+    // 枠外に出る場合もここで判定されている
     pub fn check(&self, i: usize, j: usize, d: Direction) -> bool {
         self.map[i][j] & (1 << d as u8) != 0
     }

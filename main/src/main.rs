@@ -24,18 +24,18 @@ impl Solver {
     fn dfs(&mut self, i: usize, j: usize, res: &mut State) {
         self.visited[i][j] = true;
         for d in DIRECTIONS {
-            let (di, dj) = DIRECTION_OFFSETS[d as usize];
-            let ni = i as i32 + di;
-            let nj = j as i32 + dj;
-            if (0..self.io.n as i32).contains(&ni) && (0..self.io.n as i32).contains(&nj) {
-                let (ni, nj) = (ni as usize, nj as usize);
-                if self.visited[ni][nj] || !self.io.check(i, j, d) {
-                    continue;
-                }
-                res.push(d);
-                self.dfs(ni, nj, res);
-                res.push(d.opposite());
+            if !self.io.check(i, j, d) {
+                continue;
             }
+            let (di, dj) = DIRECTION_OFFSETS[d as usize];
+            let ni = (i as i32 + di) as usize;
+            let nj = (j as i32 + dj) as usize;
+            if self.visited[ni][nj] {
+                continue;
+            }
+            res.push(d);
+            self.dfs(ni, nj, res);
+            res.push(d.opposite());
         }
     }
 
