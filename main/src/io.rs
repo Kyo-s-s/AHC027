@@ -1,5 +1,6 @@
 // --- bandle on ---
 use crate::direction::*;
+use crate::state::*;
 // --- bandle off ---
 
 use std::process::exit;
@@ -65,11 +66,8 @@ impl IO {
         self.map[i][j] & (1 << d as u8) != 0
     }
 
-    pub fn output(&self, res: &Vec<Direction>) {
-        let ans = res
-            .iter()
-            .map(|&d| DIRECTION_CHARS[d as usize])
-            .collect::<String>();
+    pub fn output(&self, res: &State) {
+        let ans = res.convert_to_string();
         println!("{}", ans);
         exit(0);
     }

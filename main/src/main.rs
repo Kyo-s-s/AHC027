@@ -2,6 +2,9 @@
 // path: direction.rs
 mod direction;
 use direction::*;
+// path: state.rs
+mod state;
+use state::*;
 // path: io.rs
 mod io;
 use io::*;
@@ -18,7 +21,7 @@ impl Solver {
         Self { io, visited }
     }
 
-    fn dfs(&mut self, i: usize, j: usize, res: &mut Vec<Direction>) {
+    fn dfs(&mut self, i: usize, j: usize, res: &mut State) {
         self.visited[i][j] = true;
         for d in DIRECTIONS {
             let (di, dj) = DIRECTION_OFFSETS[d as usize];
@@ -37,7 +40,7 @@ impl Solver {
     }
 
     fn solve(&mut self) {
-        let mut res = vec![];
+        let mut res = State::new();
         self.dfs(0, 0, &mut res);
         self.io.output(&res);
     }
