@@ -15,9 +15,17 @@ impl Direction {
             Self::L => Self::R,
         }
     }
+
+    pub fn to_offset(&self) -> (i32, i32) {
+        DIRECTION_OFFSETS[*self as usize]
+    }
+
+    pub fn to_char(&self) -> char {
+        DIRECTION_CHARS[*self as usize]
+    }
 }
 
 pub const DIRECTIONS: [Direction; 4] = [Direction::U, Direction::R, Direction::D, Direction::L];
-pub const DIRECTION_CHARS: [char; 4] = ['U', 'R', 'D', 'L'];
+const DIRECTION_CHARS: [char; 4] = ['U', 'R', 'D', 'L'];
 
-pub const DIRECTION_OFFSETS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+const DIRECTION_OFFSETS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];

@@ -17,10 +17,7 @@ impl State {
     }
 
     pub fn convert_to_string(&self) -> String {
-        self.d
-            .iter()
-            .map(|&d| DIRECTION_CHARS[d as usize])
-            .collect()
+        self.d.iter().map(|&d| d.to_char()).collect()
     }
 
     pub fn judge(&self, io: &IO) -> Option<usize> {
@@ -32,7 +29,7 @@ impl State {
             if !io.check(now.0, now.1, d) {
                 return None;
             }
-            let (di, dj) = DIRECTION_OFFSETS[d as usize];
+            let (di, dj) = d.to_offset();
             now = ((now.0 as i32 + di) as usize, (now.1 as i32 + dj) as usize);
             map[now.0][now.1].push(t);
         }

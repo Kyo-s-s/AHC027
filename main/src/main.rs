@@ -27,7 +27,7 @@ impl Solver {
             if !self.io.check(i, j, d) {
                 continue;
             }
-            let (di, dj) = DIRECTION_OFFSETS[d as usize];
+            let (di, dj) = d.to_offset();
             let ni = (i as i32 + di) as usize;
             let nj = (j as i32 + dj) as usize;
             if self.visited[ni][nj] {
