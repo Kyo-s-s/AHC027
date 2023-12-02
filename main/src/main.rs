@@ -50,6 +50,10 @@ impl Solver {
 // この x 回訪れる パートを焼く...など...？
 // ルート長さを 5000 とすると 1000回くらいは焼けそう、もっと焼きたいけど
 
+// TODO: Vec<Vec<Vec<Vec<usize>>>> で、 i, j を始点としたときの ni, nj の最短距離 を求めておく
+// これにより、x, y に行きたいときに [x][y]を見つつ、短くなる方面へ進めばよい
+// 行けるかのチェックをするべき
+
 fn main() {
     let io = IO::new();
     let mut solver = Solver::new(io);

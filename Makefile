@@ -4,3 +4,4 @@ run:
 
 bandle:
 	python bandle.py
+	cat main.rs | xclip -selection clipboard

@@ -6,6 +6,10 @@ pub enum Direction {
     L = 3,
 }
 
+pub const DIRECTIONS: [Direction; 4] = [Direction::U, Direction::R, Direction::D, Direction::L];
+const DIRECTION_CHARS: [char; 4] = ['U', 'R', 'D', 'L'];
+const DIRECTION_OFFSETS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+
 impl Direction {
     pub fn opposite(&self) -> Self {
         match self {
@@ -24,8 +28,3 @@ impl Direction {
         DIRECTION_CHARS[*self as usize]
     }
 }
-
-pub const DIRECTIONS: [Direction; 4] = [Direction::U, Direction::R, Direction::D, Direction::L];
-const DIRECTION_CHARS: [char; 4] = ['U', 'R', 'D', 'L'];
-
-const DIRECTION_OFFSETS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];

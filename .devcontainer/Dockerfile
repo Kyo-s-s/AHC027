@@ -7,7 +7,8 @@ RUN pacman -Syyu --noconfirm \
     gdb \
     git \
     rustup \
-    vi
+    vi \
+    xclip
 
 RUN rustup default stable
 
