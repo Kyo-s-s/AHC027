@@ -26,12 +26,12 @@ impl State {
         let mut now = (0, 0);
         for t in 0..l {
             let d = self.d[t];
-            if !io.check(now.0, now.1, d) {
+            if let Some(nxt) = io.next_pos(now, d) {
+                now = nxt;
+                map[now.0][now.1].push(t);
+            } else {
                 return None;
             }
-            let (di, dj) = d.to_offset();
-            now = ((now.0 as i32 + di) as usize, (now.1 as i32 + dj) as usize);
-            map[now.0][now.1].push(t);
         }
 
         let mut score = 0;

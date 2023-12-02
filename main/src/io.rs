@@ -73,8 +73,16 @@ impl IO {
     }
 
     // 枠外に出る場合もここで判定
-    pub fn check(&self, i: usize, j: usize, d: Direction) -> bool {
-        self.map[i][j] & (1 << d as u8) != 0
+    fn check(&self, pos: (usize, usize), d: Direction) -> bool {
+        self.map[pos.0][pos.1] & (1 << d as u8) != 0
+    }
+
+    pub fn next_pos(&self, pos: (usize, usize), d: Direction) -> Option<(usize, usize)> {
+        if !self.check(pos, d) {
+            return None;
+        }
+        let d = d.to_offset();
+        Some(((pos.0 as i32 + d.0) as usize, (pos.1 as i32 + d.1) as usize))
     }
 
     pub fn output(&self, res: &State) {
