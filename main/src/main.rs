@@ -8,17 +8,21 @@ use state::*;
 // path: io.rs
 mod io;
 use io::*;
+// path: data.rs
+mod data;
+use data::*;
 // --- bandle off ---
 
 struct Solver {
     io: IO,
+    data: Data,
     visited: Vec<Vec<bool>>,
 }
 
 impl Solver {
-    fn new(io: IO) -> Self {
+    fn new(io: IO, data: Data) -> Self {
         let visited = vec![vec![false; io.n]; io.n];
-        Self { io, visited }
+        Self { io, data, visited }
     }
 
     fn dfs(&mut self, i: usize, j: usize, res: &mut State) {
@@ -55,6 +59,7 @@ impl Solver {
 
 fn main() {
     let io = IO::new();
-    let mut solver = Solver::new(io);
+    let data = Data::new(&io);
+    let mut solver = Solver::new(io, data);
     solver.solve();
 }
