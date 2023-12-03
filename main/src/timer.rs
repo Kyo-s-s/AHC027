@@ -18,3 +18,5 @@ impl Timer {
         elapsed_secs + elapsed_micros / 1_000_000.0
     }
 }
+
+pub const TL: f64 = 1.9;

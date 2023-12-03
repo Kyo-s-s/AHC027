@@ -14,6 +14,8 @@ use io::*;
 // path: data.rs
 mod data;
 use data::*;
+// path: operation.rs
+mod operation;
 // --- bandle off ---
 
 struct Solver<'a> {
@@ -34,7 +36,7 @@ impl<'a> Solver<'a> {
         }
     }
 
-    fn dfs(&mut self, i: usize, j: usize, res: &mut State) {
+    fn dfs(&mut self, i: usize, j: usize, res: &mut Vec<Direction>) {
         self.visited[i][j] = true;
         for d in DIRECTIONS {
             if let Some((ni, nj)) = self.io.next_pos((i, j), d) {
@@ -51,10 +53,11 @@ impl<'a> Solver<'a> {
     }
 
     fn solve(&mut self) {
-        let mut res = State::new();
+        let mut res = vec![];
         self.dfs(0, 0, &mut res);
         // eprintln!("{}", res.judge(&self.io).unwrap());
-        self.io.output(&res);
+        let state = State::new(&self.io, res).unwrap();
+        self.io.output(&state);
     }
 }
 
