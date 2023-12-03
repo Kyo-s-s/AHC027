@@ -38,7 +38,7 @@ impl State {
                     }
                     for (k, &t) in map[i][j].iter().enumerate() {
                         let diff = if k == map[i][j].len() - 1 {
-                            l - t
+                            map[i][j][0] + l - t
                         } else {
                             map[i][j][k + 1] - t
                         };
