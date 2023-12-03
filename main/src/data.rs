@@ -3,12 +3,13 @@ use crate::direction::*;
 use crate::io::*;
 // --- bandle off ---
 
-pub struct Data {
+pub struct Data<'a> {
+    io: &'a IO,
     dist: Vec<Vec<Vec<Vec<usize>>>>,
 }
 
-impl Data {
-    pub fn new(io: &IO) -> Self {
+impl<'a> Data<'a> {
+    pub fn new(io: &'a IO) -> Self {
         let dist = {
             let mut dist = vec![vec![vec![vec![usize::MAX; io.n]; io.n]; io.n]; io.n];
             for si in 0..io.n {
@@ -31,6 +32,6 @@ impl Data {
             dist
         };
 
-        Self { dist }
+        Self { io, dist }
     }
 }

@@ -13,14 +13,14 @@ mod data;
 use data::*;
 // --- bandle off ---
 
-struct Solver {
-    io: IO,
-    data: Data,
+struct Solver<'a> {
+    io: &'a IO,
+    data: Data<'a>,
     visited: Vec<Vec<bool>>,
 }
 
-impl Solver {
-    fn new(io: IO, data: Data) -> Self {
+impl<'a> Solver<'a> {
+    fn new(io: &'a IO, data: Data<'a>) -> Self {
         let visited = vec![vec![false; io.n]; io.n];
         Self { io, data, visited }
     }
@@ -60,6 +60,6 @@ impl Solver {
 fn main() {
     let io = IO::new();
     let data = Data::new(&io);
-    let mut solver = Solver::new(io, data);
-    solver.solve();
+    let mut solver = Solver::new(&io, data);
+    solver.solve()
 }
