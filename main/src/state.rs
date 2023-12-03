@@ -7,7 +7,8 @@ use crate::operation::*;
 // --- bandle off ---
 
 pub struct State {
-    d: Vec<Direction>,
+    pub d: Vec<Direction>,
+    // map[i][j] は空ではないことが保証される
     pub map: Vec<Vec<Vec<usize>>>,
     pub score: usize,
 }
@@ -55,7 +56,16 @@ impl State {
         self.d.iter().map(|&d| d.to_char()).collect()
     }
 
-    pub fn apply(&self, operation: &Operation) -> Option<State> {
-        todo!()
+    pub fn apply_add(&self, io: &IO, operation: AddOperation) -> Option<State> {
+        let (t, d) = (operation.t, operation.d);
+        let mut new_d = vec![];
+        for i in 0..self.d.len() {
+            if i == t {
+                new_d.extend_from_slice(&d);
+            } else {
+                new_d.push(self.d[i]);
+            }
+        }
+        State::new(io, new_d)
     }
 }

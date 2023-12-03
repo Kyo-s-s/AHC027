@@ -1,7 +1,42 @@
 // --- bandle on ---
 use crate::direction::*;
 use crate::io::*;
+use crate::random::*;
+use crate::state::*;
 // --- bandle off ---
+
+struct Walk {
+    d: Vec<Direction>,
+    start: (usize, usize),
+    pos: (usize, usize),
+}
+
+impl Walk {
+    fn new(pos: (usize, usize)) -> Self {
+        Self {
+            d: vec![],
+            start: pos,
+            pos,
+        }
+    }
+
+    fn add(&mut self, io: &IO, d: Direction) {
+        self.d.push(d);
+        if let Some(npos) = io.next_pos(self.pos, d) {
+            self.pos = npos;
+        } else {
+            unreachable!("Walk::add");
+        }
+    }
+
+    fn connect(&mut self, other: Self) {
+        if self.pos != other.start {
+            unreachable!("Walk::connect");
+        }
+        self.d.extend(other.d);
+        self.pos = other.pos;
+    }
+}
 
 pub struct Data<'a> {
     io: &'a IO,
@@ -34,5 +69,38 @@ impl<'a> Data<'a> {
         };
 
         Self { io, dist }
+    }
+
+    // TODO: 不要なので消す、いい感じにする
+    fn generate_path(&self, start: (usize, usize), goal: (usize, usize)) -> Walk {
+        let mut res = Walk::new(start);
+        let dist = &self.dist[goal.0][goal.1];
+        while res.pos != goal {
+            let d = (|| {
+                for d in Direction::random_directions() {
+                    if let Some((nx, ny)) = self.io.next_pos(res.pos, d) {
+                        if dist[nx][ny] < dist[res.pos.0][res.pos.1] {
+                            return d;
+                        }
+                    }
+                }
+                unreachable!("generate_path");
+            })();
+            res.add(self.io, d);
+        }
+        res
+    }
+
+    pub fn generate_walk(
+        &self,
+        state: &State,
+        start: (usize, usize),
+        goal: (usize, usize),
+    ) -> Vec<Direction> {
+        // とりあえず雑に構築　ここを工夫することでスコアが上がる state に依りたいので引数にしておく
+        let rand = Random::get_2d(0..self.io.n);
+        let mut res = self.generate_path(start, rand);
+        res.connect(self.generate_path(rand, goal));
+        res.d
     }
 }

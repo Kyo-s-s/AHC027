@@ -2,6 +2,8 @@
 // path: timer.rs
 mod timer;
 use timer::*;
+// path: random.rs
+mod random;
 // path: direction.rs
 mod direction;
 use direction::*;
@@ -16,6 +18,7 @@ mod data;
 use data::*;
 // path: operation.rs
 mod operation;
+use operation::*;
 // --- bandle off ---
 
 struct Solver<'a> {
@@ -56,7 +59,17 @@ impl<'a> Solver<'a> {
         let mut res = vec![];
         self.dfs(0, 0, &mut res);
         // eprintln!("{}", res.judge(&self.io).unwrap());
-        let state = State::new(&self.io, res).unwrap();
+        let mut state = State::new(&self.io, res).unwrap();
+
+        while self.timer.get_time() < TL {
+            let add_op = generate_add_operation(&state, &self.io, &self.data);
+            if let Some(new_state) = state.apply_add(self.io, add_op) {
+                if new_state.score < state.score {
+                    state = new_state;
+                }
+            }
+        }
+
         self.io.output(&state);
     }
 }

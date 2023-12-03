@@ -1,3 +1,7 @@
+// --- bandle on ---
+use crate::random::*;
+// --- bandle off
+
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
     U = 0,
@@ -26,5 +30,11 @@ impl Direction {
 
     pub fn to_char(&self) -> char {
         DIRECTION_CHARS[*self as usize]
+    }
+
+    pub fn random_directions() -> [Direction; 4] {
+        let mut directions = DIRECTIONS;
+
+        directions
     }
 }
