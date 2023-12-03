@@ -10,6 +10,7 @@ pub struct Data<'a> {
 
 impl<'a> Data<'a> {
     pub fn new(io: &'a IO) -> Self {
+        // dist の計算に N = 40 のときで 50ms くらい 前処理なので許容範囲？
         let dist = {
             let mut dist = vec![vec![vec![vec![usize::MAX; io.n]; io.n]; io.n]; io.n];
             for si in 0..io.n {

@@ -1,4 +1,7 @@
 // --- bandle on ---
+// path: timer.rs
+mod timer;
+use timer::*;
 // path: direction.rs
 mod direction;
 use direction::*;
@@ -14,15 +17,21 @@ use data::*;
 // --- bandle off ---
 
 struct Solver<'a> {
+    timer: Timer,
     io: &'a IO,
     data: Data<'a>,
     visited: Vec<Vec<bool>>,
 }
 
 impl<'a> Solver<'a> {
-    fn new(io: &'a IO, data: Data<'a>) -> Self {
+    fn new(timer: Timer, io: &'a IO, data: Data<'a>) -> Self {
         let visited = vec![vec![false; io.n]; io.n];
-        Self { io, data, visited }
+        Self {
+            timer,
+            io,
+            data,
+            visited,
+        }
     }
 
     fn dfs(&mut self, i: usize, j: usize, res: &mut State) {
@@ -58,8 +67,9 @@ impl<'a> Solver<'a> {
 // 行けるかのチェックをするべき
 
 fn main() {
+    let timer = Timer::new();
     let io = IO::new();
     let data = Data::new(&io);
-    let mut solver = Solver::new(&io, data);
+    let mut solver = Solver::new(timer, &io, data);
     solver.solve()
 }
