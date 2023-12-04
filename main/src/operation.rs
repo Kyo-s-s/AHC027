@@ -18,7 +18,7 @@ pub fn generate_add_operation(state: &State, io: &IO, data: &Data) -> AddOperati
         if t == state.d.len() - 1 {
             continue;
         }
-        for d in DIRECTIONS {
+        for d in Direction::all() {
             if let Some(goal) = io.next_pos(start, d) {
                 if state.map[goal.0][goal.1].contains(&(t + 1)) {
                     return (t, start, goal);

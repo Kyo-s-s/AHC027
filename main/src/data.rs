@@ -54,7 +54,7 @@ impl<'a> Data<'a> {
                     q.push_back((si, sj));
                     dist[si][sj][si][sj] = 0;
                     while let Some((i, j)) = q.pop_front() {
-                        for d in DIRECTIONS {
+                        for d in Direction::all() {
                             if let Some((ni, nj)) = io.next_pos((i, j), d) {
                                 if dist[si][sj][ni][nj] == usize::MAX {
                                     dist[si][sj][ni][nj] = dist[si][sj][i][j] + 1;
@@ -77,7 +77,7 @@ impl<'a> Data<'a> {
         let dist = &self.dist[goal.0][goal.1];
         while res.pos != goal {
             let d = (|| {
-                for d in Direction::random_directions() {
+                for d in Direction::random() {
                     if let Some((nx, ny)) = self.io.next_pos(res.pos, d) {
                         if dist[nx][ny] < dist[res.pos.0][res.pos.1] {
                             return d;

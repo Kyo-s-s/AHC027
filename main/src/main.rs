@@ -41,7 +41,7 @@ impl<'a> Solver<'a> {
 
     fn dfs(&mut self, i: usize, j: usize, res: &mut Vec<Direction>) {
         self.visited[i][j] = true;
-        for d in DIRECTIONS {
+        for d in Direction::all() {
             if let Some((ni, nj)) = self.io.next_pos((i, j), d) {
                 if self.visited[ni][nj] {
                     continue;

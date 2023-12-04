@@ -1,3 +1,7 @@
+// --- bandle on ---
+use crate::random::*;
+// --- bandle off ---
+
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
     U = 0,
@@ -6,9 +10,35 @@ pub enum Direction {
     L = 3,
 }
 
-pub const DIRECTIONS: [Direction; 4] = [Direction::U, Direction::R, Direction::D, Direction::L];
+const DIRECTIONS: [Direction; 4] = [Direction::U, Direction::R, Direction::D, Direction::L];
 const DIRECTION_CHARS: [char; 4] = ['U', 'R', 'D', 'L'];
 const DIRECTION_OFFSETS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
+const DIRECTIONS_ALL: [[Direction; 4]; 24] = [
+    [Direction::U, Direction::R, Direction::D, Direction::L],
+    [Direction::U, Direction::R, Direction::L, Direction::D],
+    [Direction::U, Direction::D, Direction::R, Direction::L],
+    [Direction::U, Direction::D, Direction::L, Direction::R],
+    [Direction::U, Direction::L, Direction::R, Direction::D],
+    [Direction::U, Direction::L, Direction::D, Direction::R],
+    [Direction::R, Direction::U, Direction::D, Direction::L],
+    [Direction::R, Direction::U, Direction::L, Direction::D],
+    [Direction::R, Direction::D, Direction::U, Direction::L],
+    [Direction::R, Direction::D, Direction::L, Direction::U],
+    [Direction::R, Direction::L, Direction::U, Direction::D],
+    [Direction::R, Direction::L, Direction::D, Direction::U],
+    [Direction::D, Direction::U, Direction::R, Direction::L],
+    [Direction::D, Direction::U, Direction::L, Direction::R],
+    [Direction::D, Direction::R, Direction::U, Direction::L],
+    [Direction::D, Direction::R, Direction::L, Direction::U],
+    [Direction::D, Direction::L, Direction::U, Direction::R],
+    [Direction::D, Direction::L, Direction::R, Direction::U],
+    [Direction::L, Direction::U, Direction::R, Direction::D],
+    [Direction::L, Direction::U, Direction::D, Direction::R],
+    [Direction::L, Direction::R, Direction::U, Direction::D],
+    [Direction::L, Direction::R, Direction::D, Direction::U],
+    [Direction::L, Direction::D, Direction::U, Direction::R],
+    [Direction::L, Direction::D, Direction::R, Direction::U],
+];
 
 impl Direction {
     pub fn opposite(&self) -> Self {
@@ -28,9 +58,11 @@ impl Direction {
         DIRECTION_CHARS[*self as usize]
     }
 
-    pub fn random_directions() -> [Direction; 4] {
-        let mut directions = DIRECTIONS;
+    pub fn all() -> [Direction; 4] {
+        DIRECTIONS
+    }
 
-        directions
+    pub fn random() -> [Direction; 4] {
+        DIRECTIONS_ALL[Random::get(0..24)]
     }
 }
