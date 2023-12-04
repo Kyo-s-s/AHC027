@@ -90,18 +90,18 @@ impl State {
             }
         }
 
-        let mut now = (0, 0);
-        for &d in &new_d {
-            if let Some(nxt) = io.next_pos(now, d) {
-                now = nxt;
-            } else {
-                unreachable!("State::apply_del cannot move");
-            }
-        }
+        // let mut now = (0, 0);
+        // for &d in &new_d {
+        //     if let Some(nxt) = io.next_pos(now, d) {
+        //         now = nxt;
+        //     } else {
+        //         unreachable!("State::apply_del cannot move");
+        //     }
+        // }
 
-        if now != (0, 0) {
-            unreachable!("State::apply_del now != (0, 0)");
-        }
+        // if now != (0, 0) {
+        //     unreachable!("State::apply_del now != (0, 0)");
+        // }
 
         State::new(io, new_d)
     }
