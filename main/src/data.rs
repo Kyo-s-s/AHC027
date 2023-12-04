@@ -71,36 +71,42 @@ impl<'a> Data<'a> {
         Self { io, dist }
     }
 
-    // TODO: 不要なので消す、いい感じにする
-    fn generate_path(&self, start: (usize, usize), goal: (usize, usize)) -> Walk {
+    fn generate_path(&self, state: &State, start: (usize, usize), goal: (usize, usize)) -> Walk {
         let mut res = Walk::new(start);
         let dist = &self.dist[goal.0][goal.1];
         while res.pos != goal {
-            let d = (|| {
-                for d in Direction::random() {
+            let d = Direction::all()
+                .iter()
+                .map(|&d| {
                     if let Some((nx, ny)) = self.io.next_pos(res.pos, d) {
                         if dist[nx][ny] < dist[res.pos.0][res.pos.1] {
-                            return d;
+                            return Some((self.io.d[nx][ny], d));
                         }
                     }
-                }
+                    return None;
+                })
+                .filter_map(|x| x)
+                .max_by_key(|&(t, _)| t);
+
+            if let Some((_, d)) = d {
+                res.add(self.io, d);
+            } else {
                 unreachable!("generate_path");
-            })();
-            res.add(self.io, d);
+            }
         }
         res
     }
 
     pub fn generate_walk(
         &self,
-        _state: &State,
+        state: &State,
         start: (usize, usize),
         goal: (usize, usize),
     ) -> Vec<Direction> {
         // とりあえず雑に構築　ここを工夫することでスコアが上がる state に依りたいので引数にしておく
         let rand = Random::get_2d(0..self.io.n);
-        let mut res = self.generate_path(start, rand);
-        res.connect(self.generate_path(rand, goal));
+        let mut res = self.generate_path(state, start, rand);
+        res.connect(self.generate_path(state, rand, goal));
         res.d
     }
 }
