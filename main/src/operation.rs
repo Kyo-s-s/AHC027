@@ -25,7 +25,6 @@ pub struct AddOperation {
     pub d: Vec<Direction>,
 }
 
-// Rejectされないはずなのに半分くらいapplyで失敗している？
 fn generate_add_operation(state: &State, io: &IO, data: &Data) -> AddOperation {
     let (t, start, goal) = (|| loop {
         let start = Random::get_2d(0..io.n);
@@ -71,11 +70,11 @@ fn generate_del_operation(state: &State, io: &IO) -> DelOperation {
                     .unwrap()
                     .0;
 
-                return DelOperation {
-                    l: t.min(nt),
-                    r: t.max(nt) - 1,
-                    d,
-                };
+                let l = t.min(nt);
+                let r = t.max(nt);
+                let d = if t < nt { d } else { d.opposite() };
+
+                return DelOperation { l, r, d };
             }
         }
     }

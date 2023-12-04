@@ -82,13 +82,27 @@ impl State {
         let (l, r, d) = (operation.l, operation.r, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
-            if !(l <= i && i <= r) {
+            if !(l + 1 <= i && i <= r) {
                 new_d.push(self.d[i]);
             }
-            if i == l {
+            if i == l + 1 {
                 new_d.push(d);
             }
         }
+
+        let mut now = (0, 0);
+        for &d in &new_d {
+            if let Some(nxt) = io.next_pos(now, d) {
+                now = nxt;
+            } else {
+                unreachable!("State::apply_del cannot move");
+            }
+        }
+
+        if now != (0, 0) {
+            unreachable!("State::apply_del now != (0, 0)");
+        }
+
         State::new(io, new_d)
     }
 }
