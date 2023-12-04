@@ -60,7 +60,14 @@ impl State {
         self.d.iter().map(|&d| d.to_char()).collect()
     }
 
-    pub fn apply_add(&self, io: &IO, operation: AddOperation) -> Option<State> {
+    pub fn apply(&self, io: &IO, operation: Operation) -> Option<State> {
+        match operation {
+            Operation::Add(op) => self.apply_add(io, op),
+            Operation::Del(op) => self.apply_del(io, op),
+        }
+    }
+
+    fn apply_add(&self, io: &IO, operation: AddOperation) -> Option<State> {
         let (t, d) = (operation.t, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
@@ -68,6 +75,20 @@ impl State {
                 new_d.extend_from_slice(&d);
             } else {
                 new_d.push(self.d[i]);
+            }
+        }
+        State::new(io, new_d)
+    }
+
+    fn apply_del(&self, io: &IO, operation: DelOperation) -> Option<State> {
+        let (l, r, d) = (operation.l, operation.r, operation.d);
+        let mut new_d = vec![];
+        for i in 0..self.d.len() {
+            if !(l <= i && i <= r) {
+                new_d.push(self.d[i]);
+            }
+            if i == l {
+                new_d.push(d);
             }
         }
         State::new(io, new_d)
