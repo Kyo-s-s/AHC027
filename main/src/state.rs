@@ -69,7 +69,7 @@ impl State {
         let (t, d) = (operation.t, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
-            if i == t {
+            if i == t + 1 {
                 new_d.extend_from_slice(&d);
             } else {
                 new_d.push(self.d[i]);

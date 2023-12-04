@@ -61,26 +61,39 @@ impl<'a> Solver<'a> {
         // eprintln!("{}", res.judge(&self.io).unwrap());
         let mut state = State::new(&self.io, res).unwrap();
 
-        let (mut add, mut del) = (0, 0);
+        let mut gen = (0, 0);
+        let mut app = (0, 0);
+        let mut acc = (0, 0);
+
+        let count = |x, cnt| {
+            let (add, del) = cnt;
+            if x == 1 {
+                (add + 1, del)
+            } else {
+                (add, del + 1)
+            }
+        };
+
         while self.timer.get_time() < TL {
             let op = generate_operation(&state, &self.io, &self.data);
             let x = match op {
                 Operation::Add(_) => 1,
                 Operation::Del(_) => 2,
             };
+            gen = count(x, gen);
             if let Some(new_state) = state.apply(self.io, op) {
-                if x == 1 {
-                    add += 1;
-                } else {
-                    del += 1;
-                }
+                app = count(x, app);
                 if new_state.score < state.score {
+                    acc = count(x, acc);
                     state = new_state;
                 }
             }
         }
 
-        // eprintln!("add: {}, del: {}", add, del);
+        eprintln!(
+            "add: {} / {} / {}, del: {} / {} / {}",
+            gen.0, app.0, acc.0, gen.1, app.1, acc.1
+        );
         self.io.output(&state);
     }
 }
