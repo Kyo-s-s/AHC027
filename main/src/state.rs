@@ -1,5 +1,3 @@
-use std::vec;
-
 // --- bandle on ---
 use crate::direction::*;
 use crate::io::*;
