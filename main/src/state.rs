@@ -27,6 +27,10 @@ impl State {
                     return None;
                 }
             }
+            if now != (0, 0) {
+                // unreachable!("State::new now != (0, 0)");
+                return None;
+            }
             map
         };
 

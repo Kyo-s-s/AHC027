@@ -1,7 +1,3 @@
-// --- bandle on ---
-use crate::random::*;
-// --- bandle off
-
 #[derive(Debug, Clone, Copy)]
 pub enum Direction {
     U = 0,
