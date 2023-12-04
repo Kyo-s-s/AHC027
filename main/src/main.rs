@@ -80,7 +80,7 @@ impl<'a> Solver<'a> {
             }
         }
 
-        eprintln!("add: {}, del: {}", add, del);
+        // eprintln!("add: {}, del: {}", add, del);
         self.io.output(&state);
     }
 }

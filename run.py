@@ -3,7 +3,9 @@ import pipes
 import multiprocessing
 import sys
 
-CASE = 50
+# CASE = 50
+# CASE = 500
+CASE = int(sys.argv[1])
 TL = 1000
 
 def execute_case(seed):

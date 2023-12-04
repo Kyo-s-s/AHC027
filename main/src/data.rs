@@ -93,7 +93,7 @@ impl<'a> Data<'a> {
 
     pub fn generate_walk(
         &self,
-        state: &State,
+        _state: &State,
         start: (usize, usize),
         goal: (usize, usize),
     ) -> Vec<Direction> {
