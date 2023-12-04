@@ -8,6 +8,7 @@ pub struct State {
     pub d: Vec<Direction>,
     // map[i][j] は空ではないことが保証される
     pub map: Vec<Vec<Vec<usize>>>,
+    pub score_map: Vec<Vec<usize>>,
     pub score: usize,
 }
 
@@ -32,8 +33,8 @@ impl State {
             map
         };
 
-        let score = {
-            let mut score = 0;
+        let score_map = {
+            let mut score_map = vec![vec![0; io.n]; io.n];
             for i in 0..io.n {
                 for j in 0..io.n {
                     if map[i][j].is_empty() {
@@ -45,13 +46,25 @@ impl State {
                         } else {
                             map[i][j][k + 1] - t
                         };
-                        score += (diff - 1) * diff / 2 * io.d[i][j];
+                        score_map[i][j] += (diff - 1) * diff / 2 * io.d[i][j];
                     }
                 }
             }
-            score / l
+            score_map
         };
-        Some(Self { d, map, score })
+
+        let score = score_map
+            .iter()
+            .map(|row| row.iter().sum::<usize>())
+            .sum::<usize>()
+            / l;
+
+        Some(Self {
+            d,
+            map,
+            score_map,
+            score,
+        })
     }
 
     pub fn convert_to_string(&self) -> String {
