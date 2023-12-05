@@ -89,6 +89,6 @@ pub struct TieOperation {
     pub count: usize,
 }
 
-fn generate_tie_operation() -> TieOperation {
+pub fn generate_tie_operation() -> TieOperation {
     TieOperation { count: 2 }
 }

@@ -132,7 +132,7 @@ impl State {
         State::new(io, new_d)
     }
 
-    fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Result<State, Error> {
+    pub fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Result<State, Error> {
         let mut new_d = vec![];
         for _ in 0..operation.count {
             new_d.extend_from_slice(&self.d);
