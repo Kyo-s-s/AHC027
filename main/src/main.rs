@@ -71,17 +71,26 @@ impl<'a> Solver<'a> {
             Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
         };
 
+        let mut err_cnt = [0; 4];
+
         while self.timer.get_time() < TL {
             let op = generate_operation(&state, &self.io, &self.data);
             gen = count(&op, gen);
-            if let Some(new_state) = state.apply(self.io, &op) {
-                app = count(&op, app);
-                if let Operation::Tie(_) = op {
-                    acc = count(&op, acc);
-                    state = new_state;
-                } else if new_state.score < state.score {
-                    acc = count(&op, acc);
-                    state = new_state;
+            match state.apply(self.io, &op) {
+                Ok(new_state) => {
+                    app = count(&op, app);
+                    if let Operation::Tie(_) = op {
+                        acc = count(&op, acc);
+                        state = new_state;
+                    } else if new_state.score < state.score {
+                        acc = count(&op, acc);
+                        state = new_state;
+                    }
+                }
+                Err(error) => {
+                    if let Operation::Del(_) = op {
+                        err_cnt[error as usize] += 1;
+                    }
                 }
             }
         }
@@ -90,6 +99,8 @@ impl<'a> Solver<'a> {
             "add: {} / {} / {}, del: {} / {} / {}, tie: {} / {} / {}",
             gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
         );
+        eprintln!("err: {:?}", err_cnt);
+
         self.io.output(&state);
     }
 }

@@ -12,12 +12,20 @@ pub struct State {
     pub score: usize,
 }
 
+#[derive(Debug)]
+pub enum Error {
+    TooLong,
+    CannotMove,
+    NotGoal,
+    NotVisited,
+}
+
 impl State {
-    pub fn new(io: &IO, d: Vec<Direction>) -> Option<Self> {
+    pub fn new(io: &IO, d: Vec<Direction>) -> Result<Self, Error> {
         let l = d.len();
 
         if l > 10000 {
-            return None;
+            return Err(Error::TooLong);
         }
 
         let map = {
@@ -28,12 +36,11 @@ impl State {
                     now = nxt;
                     map[now.0][now.1].push(t);
                 } else {
-                    return None;
+                    return Err(Error::CannotMove);
                 }
             }
             if now != (0, 0) {
-                // unreachable!("State::new now != (0, 0)");
-                return None;
+                return Err(Error::NotGoal);
             }
             map
         };
@@ -43,7 +50,7 @@ impl State {
             for i in 0..io.n {
                 for j in 0..io.n {
                     if map[i][j].is_empty() {
-                        return None;
+                        return Err(Error::NotVisited);
                     }
                     for (k, &t) in map[i][j].iter().enumerate() {
                         let diff = if k == map[i][j].len() - 1 {
@@ -64,7 +71,7 @@ impl State {
             .sum::<usize>()
             / l;
 
-        Some(Self {
+        Ok(Self {
             d,
             map,
             score_map,
@@ -76,7 +83,7 @@ impl State {
         self.d.iter().map(|&d| d.to_char()).collect()
     }
 
-    pub fn apply(&self, io: &IO, operation: &Operation) -> Option<State> {
+    pub fn apply(&self, io: &IO, operation: &Operation) -> Result<State, Error> {
         match operation {
             Operation::Add(op) => self.apply_add(io, op),
             Operation::Del(op) => self.apply_del(io, op),
@@ -84,7 +91,7 @@ impl State {
         }
     }
 
-    fn apply_add(&self, io: &IO, operation: &AddOperation) -> Option<State> {
+    fn apply_add(&self, io: &IO, operation: &AddOperation) -> Result<State, Error> {
         let (t, d) = (operation.t, &operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
@@ -97,7 +104,7 @@ impl State {
         State::new(io, new_d)
     }
 
-    fn apply_del(&self, io: &IO, operation: &DelOperation) -> Option<State> {
+    fn apply_del(&self, io: &IO, operation: &DelOperation) -> Result<State, Error> {
         let (l, r, d) = (operation.l, operation.r, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
@@ -125,7 +132,7 @@ impl State {
         State::new(io, new_d)
     }
 
-    fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Option<State> {
+    fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Result<State, Error> {
         let mut new_d = vec![];
         for _ in 0..operation.count {
             new_d.extend_from_slice(&self.d);
