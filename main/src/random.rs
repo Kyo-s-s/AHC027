@@ -5,6 +5,10 @@ use rand::{seq::SliceRandom, Rng};
 pub struct Random {}
 
 impl Random {
+    pub fn get_f() -> f64 {
+        rand::thread_rng().gen_range(0.0..1.0)
+    }
+
     pub fn get(range: std::ops::Range<usize>) -> usize {
         rand::thread_rng().gen_range(range)
     }

@@ -67,17 +67,14 @@ impl<'a> Solver<'a> {
             .apply_tie(self.io, &tie_op)
             .unwrap();
 
-        let mut gen = (0, 0, 0);
-        let mut app = (0, 0, 0);
-        let mut acc = (0, 0, 0);
+        let mut gen = (0, 0);
+        let mut app = (0, 0);
+        let mut acc = (0, 0);
 
-        let count = |op: &Operation, cnt: (usize, usize, usize)| match op {
-            Operation::Add(_) => (cnt.0 + 1, cnt.1, cnt.2),
-            Operation::Del(_) => (cnt.0, cnt.1 + 1, cnt.2),
-            Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
+        let count = |op: &Operation, cnt: (usize, usize)| match op {
+            Operation::Del(_) => (cnt.0 + 1, cnt.1),
+            Operation::Tie(_) => (cnt.0, cnt.1 + 1),
         };
-
-        let mut err_cnt = [0; 4];
 
         while self.timer.get_time() < TL {
             let op = generate_operation(&state, &self.io, &self.data);
@@ -85,27 +82,19 @@ impl<'a> Solver<'a> {
             match state.apply(self.io, &op) {
                 Ok(new_state) => {
                     app = count(&op, app);
-                    if let Operation::Tie(_) = op {
-                        acc = count(&op, acc);
-                        state = new_state;
-                    } else if new_state.score < state.score {
+                    if self.timer.force_next(&state, &new_state) {
                         acc = count(&op, acc);
                         state = new_state;
                     }
                 }
-                Err(error) => {
-                    if let Operation::Del(_) = op {
-                        err_cnt[error as usize] += 1;
-                    }
-                }
+                _ => {}
             }
         }
 
-        eprintln!(
-            "add: {} / {} / {}, del: {} / {} / {}, tie: {} / {} / {}",
-            gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
-        );
-        eprintln!("err: {:?}", err_cnt);
+        // eprintln!(
+        //     "add: {} / {} / {}, del: {} / {} / {}, tie: {} / {} / {}",
+        //     gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
+        // );
 
         self.io.output(&state);
     }
