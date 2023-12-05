@@ -59,52 +59,53 @@ impl<'a> Solver<'a> {
         let mut res = vec![];
         self.dfs(0, 0, &mut res);
         // eprintln!("{}", res.judge(&self.io).unwrap());
-        let mut state = State::new(&self.io, res).unwrap();
+        let state = State::new(&self.io, res).unwrap();
+        let tie_op = generate_tie_operation();
+        let mut state = state.apply_tie(self.io, &tie_op).unwrap();
 
-        let mut gen = (0, 0);
-        let mut app = (0, 0);
-        let mut acc = (0, 0);
+        let mut gen = (0, 0, 0);
+        let mut app = (0, 0, 0);
+        let mut acc = (0, 0, 0);
 
-        let count = |x, cnt| {
-            let (add, del) = cnt;
-            if x == 1 {
-                (add + 1, del)
-            } else {
-                (add, del + 1)
-            }
+        let count = |op: &Operation, cnt: (usize, usize, usize)| match op {
+            Operation::Add(_) => (cnt.0 + 1, cnt.1, cnt.2),
+            Operation::Del(_) => (cnt.0, cnt.1 + 1, cnt.2),
+            Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
         };
+
+        let mut err_cnt = [0; 4];
 
         while self.timer.get_time() < TL {
             let op = generate_operation(&state, &self.io, &self.data);
-            let x = match op {
-                Operation::Add(_) => 1,
-                Operation::Del(_) => 2,
-            };
-            gen = count(x, gen);
-            if let Some(new_state) = state.apply(self.io, op) {
-                app = count(x, app);
-                if new_state.score < state.score {
-                    acc = count(x, acc);
-                    state = new_state;
+            gen = count(&op, gen);
+            match state.apply(self.io, &op) {
+                Ok(new_state) => {
+                    app = count(&op, app);
+                    if let Operation::Tie(_) = op {
+                        acc = count(&op, acc);
+                        state = new_state;
+                    } else if new_state.score < state.score {
+                        acc = count(&op, acc);
+                        state = new_state;
+                    }
+                }
+                Err(error) => {
+                    if let Operation::Del(_) = op {
+                        err_cnt[error as usize] += 1;
+                    }
                 }
             }
         }
 
         eprintln!(
-            "add: {} / {} / {}, del: {} / {} / {}",
-            gen.0, app.0, acc.0, gen.1, app.1, acc.1
+            "add: {} / {} / {}, del: {} / {} / {}, tie: {} / {} / {}",
+            gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
         );
+        eprintln!("err: {:?}", err_cnt);
+
         self.io.output(&state);
     }
 }
-
-// Vec<Vec<usize>> で、 (i, j) に x 回(うまくならして)訪れるようなルートの貪欲 を求めるようにして、
-// この x 回訪れる パートを焼く...など...？
-// ルート長さを 5000 とすると 1000回くらいは焼けそう、もっと焼きたいけど
-
-// TODO: Vec<Vec<Vec<Vec<usize>>>> で、 i, j を始点としたときの ni, nj の最短距離 を求めておく
-// これにより、x, y に行きたいときに [x][y]を見つつ、短くなる方面へ進めばよい
-// 行けるかのチェックをするべき
 
 fn main() {
     let timer = Timer::new();
