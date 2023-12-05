@@ -9,7 +9,7 @@ pub struct State {
     // map[i][j] は空ではないことが保証される
     pub map: Vec<Vec<Vec<usize>>>,
     pub score_map: Vec<Vec<usize>>,
-    pub score: usize,
+    pub score: f64,
 }
 
 #[derive(Debug)]
@@ -68,8 +68,8 @@ impl State {
         let score = score_map
             .iter()
             .map(|row| row.iter().sum::<usize>())
-            .sum::<usize>()
-            / l;
+            .sum::<usize>() as f64
+            / l as f64;
 
         Ok(Self {
             d,
@@ -85,23 +85,9 @@ impl State {
 
     pub fn apply(&self, io: &IO, operation: &Operation) -> Result<State, Error> {
         match operation {
-            Operation::Add(op) => self.apply_add(io, op),
             Operation::Del(op) => self.apply_del(io, op),
             Operation::Tie(op) => self.apply_tie(io, op),
         }
-    }
-
-    fn apply_add(&self, io: &IO, operation: &AddOperation) -> Result<State, Error> {
-        let (t, d) = (operation.t, &operation.d);
-        let mut new_d = vec![];
-        for i in 0..self.d.len() {
-            if i == t + 1 {
-                new_d.extend_from_slice(&d);
-            } else {
-                new_d.push(self.d[i]);
-            }
-        }
-        State::new(io, new_d)
     }
 
     fn apply_del(&self, io: &IO, operation: &DelOperation) -> Result<State, Error> {
