@@ -60,7 +60,7 @@ impl<'a> Solver<'a> {
         self.dfs(0, 0, &mut res);
         // eprintln!("{}", res.judge(&self.io).unwrap());
         let state = State::new(&self.io, res).unwrap();
-        let tie_op = generate_tie_operation(&state);
+        let tie_op = generate_tie_operation(&state, &self.io);
         let mut state = state
             .apply_tie(self.io, &tie_op)
             .unwrap()

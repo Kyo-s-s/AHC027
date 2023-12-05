@@ -4,6 +4,7 @@ use crate::io::*;
 use crate::operation::*;
 // --- bandle off ---
 
+#[derive(Debug, Clone)]
 pub struct State {
     pub d: Vec<Direction>,
     // map[i][j] は空ではないことが保証される
@@ -101,24 +102,13 @@ impl State {
                 new_d.push(d);
             }
         }
-
-        // let mut now = (0, 0);
-        // for &d in &new_d {
-        //     if let Some(nxt) = io.next_pos(now, d) {
-        //         now = nxt;
-        //     } else {
-        //         unreachable!("State::apply_del cannot move");
-        //     }
-        // }
-
-        // if now != (0, 0) {
-        //     unreachable!("State::apply_del now != (0, 0)");
-        // }
-
         State::new(io, new_d)
     }
 
     pub fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Result<State, Error> {
+        if operation.count == 1 {
+            return Ok(self.clone());
+        }
         let mut new_d = vec![];
         for _ in 0..operation.count {
             new_d.extend_from_slice(&self.d);

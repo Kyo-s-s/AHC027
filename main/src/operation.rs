@@ -14,7 +14,7 @@ pub enum Operation {
 pub fn generate_operation(state: &State, io: &IO, _data: &Data) -> Operation {
     let x = Random::get(0..1000);
     if x == 0 {
-        Operation::Tie(generate_tie_operation(state))
+        Operation::Tie(generate_tie_operation(state, io))
     } else {
         // d が小さいのに複数回来ているセルがある、なんでだろう　遷移を見直す
         Operation::Del(generate_del_operation(state, io))
@@ -61,8 +61,9 @@ pub struct TieOperation {
     pub count: usize,
 }
 
-pub fn generate_tie_operation(state: &State) -> TieOperation {
+pub fn generate_tie_operation(state: &State, _io: &IO) -> TieOperation {
     let l = state.d.len();
+    // TODO: len
     if l * 2 > 10000 {
         return TieOperation { count: 1 };
     }

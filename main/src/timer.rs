@@ -26,12 +26,8 @@ impl Timer {
     pub fn force_next(&self, current: &State, next: &State) -> bool {
         let current_score = current.score;
         let next_score = next.score;
-        let temp = start_temp + (end_temp - start_temp) * self.get_time() / TL;
+        let temp = START_TEMP + (END_TEMP - START_TEMP) * self.get_time() / TL;
         let probability = ((current_score - next_score) / temp).exp();
-        // eprintln!(
-        //     "probability: {} now: {}, next: {}",
-        //     probability, current_score, next_score
-        // );
         probability > Random::get_f()
     }
 }
@@ -41,5 +37,5 @@ impl Timer {
 pub const TL: f64 = 1.9;
 // pub const TL: f64 = 0.0;
 
-const start_temp: f64 = 100.0;
-const end_temp: f64 = 0.1;
+const START_TEMP: f64 = 100.0;
+const END_TEMP: f64 = 0.1;
