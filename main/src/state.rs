@@ -15,6 +15,11 @@ pub struct State {
 impl State {
     pub fn new(io: &IO, d: Vec<Direction>) -> Option<Self> {
         let l = d.len();
+
+        if l > 10000 {
+            return None;
+        }
+
         let map = {
             let mut map = vec![vec![vec![]; io.n]; io.n];
             let mut now = (0, 0);
@@ -71,15 +76,16 @@ impl State {
         self.d.iter().map(|&d| d.to_char()).collect()
     }
 
-    pub fn apply(&self, io: &IO, operation: Operation) -> Option<State> {
+    pub fn apply(&self, io: &IO, operation: &Operation) -> Option<State> {
         match operation {
             Operation::Add(op) => self.apply_add(io, op),
             Operation::Del(op) => self.apply_del(io, op),
+            Operation::Tie(op) => self.apply_tie(io, op),
         }
     }
 
-    fn apply_add(&self, io: &IO, operation: AddOperation) -> Option<State> {
-        let (t, d) = (operation.t, operation.d);
+    fn apply_add(&self, io: &IO, operation: &AddOperation) -> Option<State> {
+        let (t, d) = (operation.t, &operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
             if i == t + 1 {
@@ -91,7 +97,7 @@ impl State {
         State::new(io, new_d)
     }
 
-    fn apply_del(&self, io: &IO, operation: DelOperation) -> Option<State> {
+    fn apply_del(&self, io: &IO, operation: &DelOperation) -> Option<State> {
         let (l, r, d) = (operation.l, operation.r, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
@@ -116,6 +122,14 @@ impl State {
         //     unreachable!("State::apply_del now != (0, 0)");
         // }
 
+        State::new(io, new_d)
+    }
+
+    fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Option<State> {
+        let mut new_d = vec![];
+        for _ in 0..operation.count {
+            new_d.extend_from_slice(&self.d);
+        }
         State::new(io, new_d)
     }
 }

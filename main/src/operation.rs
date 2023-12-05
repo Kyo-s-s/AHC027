@@ -9,13 +9,18 @@ use crate::state::*;
 pub enum Operation {
     Add(AddOperation),
     Del(DelOperation),
+    Tie(TieOperation),
 }
 
 pub fn generate_operation(state: &State, io: &IO, data: &Data) -> Operation {
-    let x = Random::get(0..100);
-    if x < 50 {
+    let x = Random::get(0..1000);
+    if x == 0 {
+        Operation::Tie(generate_tie_operation())
+    } else if x < 1 {
+        // しない
         Operation::Add(generate_add_operation(state, io, data))
     } else {
+        // d が小さいのに複数回来ているセルがある、なんでだろう　遷移を見直す
         Operation::Del(generate_del_operation(state, io))
     }
 }
@@ -41,7 +46,7 @@ fn generate_add_operation(state: &State, io: &IO, data: &Data) -> AddOperation {
         }
         unimplemented!("generate_add_operation")
     })();
-    let d = data.generate_walk(state, start, goal);
+    let d = data.generate_walk(state, t, start, goal);
     AddOperation { t, d }
 }
 
@@ -78,4 +83,12 @@ fn generate_del_operation(state: &State, io: &IO) -> DelOperation {
             }
         }
     }
+}
+
+pub struct TieOperation {
+    pub count: usize,
+}
+
+fn generate_tie_operation() -> TieOperation {
+    TieOperation { count: 2 }
 }
