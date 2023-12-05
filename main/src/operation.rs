@@ -15,7 +15,7 @@ pub enum Operation {
 pub fn generate_operation(state: &State, io: &IO, data: &Data) -> Operation {
     let x = Random::get(0..1000);
     if x == 0 {
-        Operation::Tie(generate_tie_operation())
+        Operation::Tie(generate_tie_operation(state))
     } else if x < 1 {
         // しない
         Operation::Add(generate_add_operation(state, io, data))
@@ -59,6 +59,7 @@ pub struct DelOperation {
 
 fn generate_del_operation(state: &State, io: &IO) -> DelOperation {
     loop {
+        // d が小さいのを start に選びやすくする...など
         let start = Random::get_2d(0..io.n);
         let t = *Random::get_item(&state.map[start.0][start.1]);
         for d in Direction::random() {
@@ -89,6 +90,10 @@ pub struct TieOperation {
     pub count: usize,
 }
 
-pub fn generate_tie_operation() -> TieOperation {
+pub fn generate_tie_operation(state: &State) -> TieOperation {
+    let l = state.d.len();
+    if l * 2 > 10000 {
+        return TieOperation { count: 1 };
+    }
     TieOperation { count: 2 }
 }

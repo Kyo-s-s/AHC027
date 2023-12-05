@@ -24,7 +24,7 @@ impl State {
     pub fn new(io: &IO, d: Vec<Direction>) -> Result<Self, Error> {
         let l = d.len();
 
-        if l > 10000 {
+        if l > 100000 {
             return Err(Error::TooLong);
         }
 
