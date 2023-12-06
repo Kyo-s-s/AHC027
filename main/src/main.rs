@@ -68,26 +68,26 @@ impl<'a> Solver<'a> {
             .apply_tie(self.io, &self.data, &tie_op)
             .unwrap();
 
-        // let mut gen = (0, 0, 0);
-        // let mut app = (0, 0, 0);
-        // let mut acc = (0, 0, 0);
+        let mut gen = (0, 0, 0);
+        let mut app = (0, 0, 0);
+        let mut acc = (0, 0, 0);
 
-        // let count = |op: &Operation, cnt: (usize, usize, usize)| match op {
-        //     Operation::Del(_) => (cnt.0 + 1, cnt.1, cnt.2),
-        //     Operation::DelAdd(_) => (cnt.0, cnt.1 + 1, cnt.2),
-        //     Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
-        // };
+        let count = |op: &Operation, cnt: (usize, usize, usize)| match op {
+            Operation::Del(_) => (cnt.0 + 1, cnt.1, cnt.2),
+            Operation::DelAdd(_) => (cnt.0, cnt.1 + 1, cnt.2),
+            Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
+        };
 
         // let mut err_cnt = [0; 4];
 
         while self.timer.get_time() < TL {
             let op = generate_operation(&self.timer, &state, &self.io, &self.data);
-            // gen = count(&op, gen);
+            gen = count(&op, gen);
             match state.apply(self.io, &self.data,&op) {
                 Ok(new_state) => {
-                    // app = count(&op, app);
+                    app = count(&op, app);
                     if self.timer.force_next(&state, &new_state) {
-                        // acc = count(&op, acc);
+                        acc = count(&op, acc);
                         state = new_state;
                     }
                 }
@@ -101,10 +101,11 @@ impl<'a> Solver<'a> {
             }
         }
 
-        // eprintln!(
-        //     "del: {} / {} / {}, delAdd: {} / {} / {}, tie: {} / {} / {}",
-        //     gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
-        // );
+        eprintln!(
+            "del: {} / {} / {}, delAdd: {} / {} / {}, tie: {} / {} / {}",
+            gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
+        );
+        eprintln!("score: {}", state.score);
         // eprintln!("err: {:?}", err_cnt);
 
         self.io.output(&state);
