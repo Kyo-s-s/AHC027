@@ -4,19 +4,26 @@ use crate::direction::*;
 use crate::io::*;
 use crate::random::*;
 use crate::state::*;
+use crate::timer::*;
 // --- bandle off ---
 
 pub enum Operation {
     Del(DelOperation),
+    DelAdd(DelAddOperation),
     Tie(TieOperation),
 }
 
-pub fn generate_operation(state: &State, io: &IO, _data: &Data) -> Operation {
-    let x = Random::get(0..1000);
-    if x == 0 {
-        Operation::Tie(generate_tie_operation(state, io))
+pub fn generate_operation(timer: &Timer, state: &State, io: &IO, data: &Data) -> Operation {
+    if Random::get(0..1000) < 1 {
+        return Operation::Tie(generate_tie_operation(state, io));
+    }
+    let t = timer.get_time() / TL;
+    let r = Random::get_f();
+    if r < t && state.low_routes.len() > 50 {
+        // 時間経過でDelAddが選ばれるように
+        // 削除区間が決まっちゃって...みたいな？
+        Operation::DelAdd(generate_del_add_operation(state, io, data))
     } else {
-        // d が小さいのに複数回来ているセルがある、なんでだろう　遷移を見直す
         Operation::Del(generate_del_operation(state, io))
     }
 }
@@ -55,6 +62,22 @@ fn generate_del_operation(state: &State, io: &IO) -> DelOperation {
             }
         }
     }
+}
+
+pub struct DelAddOperation {
+    pub l: usize,
+    pub r: usize,
+    pub d: Vec<Direction>,
+}
+
+pub fn generate_del_add_operation(state: &State, _io: &IO, data: &Data) -> DelAddOperation {
+    let route = Random::get_item(&state.low_routes);
+    let path = data.generate_path(state, route.start, route.goal);
+    return DelAddOperation {
+        l: route.t,
+        r: route.nt,
+        d: path.d,
+    };
 }
 
 pub struct TieOperation {

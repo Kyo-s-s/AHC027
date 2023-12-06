@@ -21,7 +21,7 @@ impl Random {
         &items[Self::get(0..items.len())]
     }
 
-    pub fn shuffle<T>(items: &mut [T]) {
+    pub fn _shuffle<T>(items: &mut [T]) {
         items.shuffle(&mut rand::thread_rng());
     }
 }

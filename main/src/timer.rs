@@ -34,7 +34,7 @@ impl Timer {
 
 // pub const TL: f64 = 9.9;
 // pub const TL: f64 = 4.9;
-pub const TL: f64 = 1.9;
+pub const TL: f64 = 1.97;
 // pub const TL: f64 = 0.0;
 
 const START_TEMP: f64 = 100.0;
