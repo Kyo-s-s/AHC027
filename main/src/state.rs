@@ -67,11 +67,8 @@ impl State {
             for (t, &d) in d.iter().enumerate() {
                 if let Some(nxt) = io.next_pos(now, d) {
                     map[nxt.0][nxt.1].push(t);
-                    if io.d[nxt.0][nxt.1] < 50 {
-                        if low_routes.is_empty()
-                            || low_routes.last().unwrap().nt != t - 1
-                            || Random::get_f() < 0.01
-                        {
+                    if io.d[nxt.0][nxt.1] < Random::get(0..500) {
+                        if low_routes.is_empty() || low_routes.last().unwrap().nt != t - 1 {
                             low_routes.push(Route::new(t, nxt));
                         } else if low_routes.last().unwrap().nt == t - 1 {
                             low_routes.last_mut().unwrap().add(io, d);

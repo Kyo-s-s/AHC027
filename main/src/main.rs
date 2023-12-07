@@ -101,11 +101,11 @@ impl<'a> Solver<'a> {
             }
         }
 
-        eprintln!(
-            "del: {} / {} / {}, delAdd: {} / {} / {}, tie: {} / {} / {}",
-            gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
-        );
-        eprintln!("score: {}", state.score);
+        // eprintln!(
+        //     "del: {} / {} / {}, delAdd: {} / {} / {}, tie: {} / {} / {}",
+        //     gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
+        // );
+        // eprintln!("score: {}", state.score);
         // eprintln!("err: {:?}", err_cnt);
 
         self.io.output(&state);
