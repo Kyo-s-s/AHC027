@@ -1,12 +1,11 @@
 // --- bandle on ---
 use crate::direction::*;
 use crate::io::*;
-use crate::random::*;
 use crate::state::*;
 // --- bandle off ---
 
-struct Walk {
-    d: Vec<Direction>,
+pub struct Walk {
+    pub d: Vec<Direction>,
     start: (usize, usize),
     pos: (usize, usize),
 }
@@ -29,7 +28,7 @@ impl Walk {
         }
     }
 
-    fn connect(&mut self, other: Self) {
+    fn _connect(&mut self, other: Self) {
         if self.pos != other.start {
             unreachable!("Walk::connect");
         }
@@ -71,7 +70,16 @@ impl<'a> Data<'a> {
         Self { io, dist }
     }
 
-    fn generate_path(&self, state: &State, start: (usize, usize), goal: (usize, usize)) -> Walk {
+    pub fn dist(&self, start: (usize, usize), goal: (usize, usize)) -> usize {
+        self.dist[start.0][start.1][goal.0][goal.1]
+    }
+
+    pub fn generate_path(
+        &self,
+        _state: &State,
+        start: (usize, usize),
+        goal: (usize, usize),
+    ) -> Walk {
         let mut res = Walk::new(start);
         let dist = &self.dist[goal.0][goal.1];
         while res.pos != goal {
@@ -95,19 +103,5 @@ impl<'a> Data<'a> {
             }
         }
         res
-    }
-
-    pub fn generate_walk(
-        &self,
-        state: &State,
-        t: usize,
-        start: (usize, usize),
-        goal: (usize, usize),
-    ) -> Vec<Direction> {
-        // とりあえず雑に構築　ここを工夫することでスコアが上がる state に依りたいので引数にしておく
-        let rand = Random::get_2d(0..self.io.n);
-        let mut res = self.generate_path(state, start, rand);
-        res.connect(self.generate_path(state, rand, goal));
-        res.d
     }
 }

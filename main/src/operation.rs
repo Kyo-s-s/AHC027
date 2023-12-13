@@ -4,50 +4,28 @@ use crate::direction::*;
 use crate::io::*;
 use crate::random::*;
 use crate::state::*;
+use crate::timer::*;
 // --- bandle off ---
 
 pub enum Operation {
-    Add(AddOperation),
     Del(DelOperation),
+    DelAdd(DelAddOperation),
     Tie(TieOperation),
 }
 
-pub fn generate_operation(state: &State, io: &IO, data: &Data) -> Operation {
-    let x = Random::get(0..1000);
-    if x == 0 {
-        Operation::Tie(generate_tie_operation(state))
-    } else if x < 1 {
-        // しない
-        Operation::Add(generate_add_operation(state, io, data))
+pub fn generate_operation(timer: &Timer, state: &State, io: &IO, data: &Data) -> Operation {
+    if Random::get(0..1000) < 1 {
+        return Operation::Tie(generate_tie_operation(state, io));
+    }
+    let t = timer.get_time() / TL;
+    let r = Random::get_f();
+    if r < t && state.low_routes.len() > 50 {
+        // 時間経過でDelAddが選ばれるように
+        // 削除区間が決まっちゃって...みたいな？
+        Operation::DelAdd(generate_del_add_operation(state, io, data))
     } else {
-        // d が小さいのに複数回来ているセルがある、なんでだろう　遷移を見直す
         Operation::Del(generate_del_operation(state, io))
     }
-}
-
-pub struct AddOperation {
-    pub t: usize,
-    pub d: Vec<Direction>,
-}
-
-fn generate_add_operation(state: &State, io: &IO, data: &Data) -> AddOperation {
-    let (t, start, goal) = (|| loop {
-        let start = Random::get_2d(0..io.n);
-        let t = *Random::get_item(&state.map[start.0][start.1]);
-        if t == state.d.len() - 1 {
-            continue;
-        }
-        for d in Direction::all() {
-            if let Some(goal) = io.next_pos(start, d) {
-                if state.map[goal.0][goal.1].contains(&(t + 1)) {
-                    return (t, start, goal);
-                }
-            }
-        }
-        unimplemented!("generate_add_operation")
-    })();
-    let d = data.generate_walk(state, t, start, goal);
-    AddOperation { t, d }
 }
 
 pub struct DelOperation {
@@ -86,12 +64,29 @@ fn generate_del_operation(state: &State, io: &IO) -> DelOperation {
     }
 }
 
+pub struct DelAddOperation {
+    pub l: usize,
+    pub r: usize,
+    pub d: Vec<Direction>,
+}
+
+pub fn generate_del_add_operation(state: &State, _io: &IO, data: &Data) -> DelAddOperation {
+    let route = Random::get_item(&state.low_routes);
+    let path = data.generate_path(state, route.start, route.goal);
+    return DelAddOperation {
+        l: route.t,
+        r: route.nt,
+        d: path.d,
+    };
+}
+
 pub struct TieOperation {
     pub count: usize,
 }
 
-pub fn generate_tie_operation(state: &State) -> TieOperation {
+pub fn generate_tie_operation(state: &State, _io: &IO) -> TieOperation {
     let l = state.d.len();
+    // TODO: len
     if l * 2 > 10000 {
         return TieOperation { count: 1 };
     }

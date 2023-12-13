@@ -1,6 +1,7 @@
 // --- bandle on ---
 // path: timer.rs
 mod timer;
+
 use timer::*;
 // path: random.rs
 mod random;
@@ -59,12 +60,12 @@ impl<'a> Solver<'a> {
         let mut res = vec![];
         self.dfs(0, 0, &mut res);
         // eprintln!("{}", res.judge(&self.io).unwrap());
-        let state = State::new(&self.io, res).unwrap();
-        let tie_op = generate_tie_operation(&state);
+        let state = State::new(self.io, &self.data, res).unwrap();
+        let tie_op = generate_tie_operation(&state, &self.io);
         let mut state = state
-            .apply_tie(self.io, &tie_op)
+            .apply_tie(self.io, &self.data, &tie_op)
             .unwrap()
-            .apply_tie(self.io, &tie_op)
+            .apply_tie(self.io, &self.data, &tie_op)
             .unwrap();
 
         let mut gen = (0, 0, 0);
@@ -72,40 +73,40 @@ impl<'a> Solver<'a> {
         let mut acc = (0, 0, 0);
 
         let count = |op: &Operation, cnt: (usize, usize, usize)| match op {
-            Operation::Add(_) => (cnt.0 + 1, cnt.1, cnt.2),
-            Operation::Del(_) => (cnt.0, cnt.1 + 1, cnt.2),
+            Operation::Del(_) => (cnt.0 + 1, cnt.1, cnt.2),
+            Operation::DelAdd(_) => (cnt.0, cnt.1 + 1, cnt.2),
             Operation::Tie(_) => (cnt.0, cnt.1, cnt.2 + 1),
         };
 
-        let mut err_cnt = [0; 4];
+        // let mut err_cnt = [0; 4];
 
         while self.timer.get_time() < TL {
-            let op = generate_operation(&state, &self.io, &self.data);
+            let op = generate_operation(&self.timer, &state, &self.io, &self.data);
             gen = count(&op, gen);
-            match state.apply(self.io, &op) {
+            match state.apply(self.io, &self.data,&op) {
                 Ok(new_state) => {
                     app = count(&op, app);
-                    if let Operation::Tie(_) = op {
-                        acc = count(&op, acc);
-                        state = new_state;
-                    } else if new_state.score < state.score {
+                    if self.timer.force_next(&state, &new_state) {
                         acc = count(&op, acc);
                         state = new_state;
                     }
                 }
-                Err(error) => {
-                    if let Operation::Del(_) = op {
-                        err_cnt[error as usize] += 1;
-                    }
-                }
+                _ => {}
+                // Err(error) => match op {
+                //     Operation::DelAdd(_) => {
+                //         err_cnt[error as usize] += 1;
+                //     }
+                //     _ => {}
+                // },
             }
         }
 
-        eprintln!(
-            "add: {} / {} / {}, del: {} / {} / {}, tie: {} / {} / {}",
-            gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
-        );
-        eprintln!("err: {:?}", err_cnt);
+        // eprintln!(
+        //     "del: {} / {} / {}, delAdd: {} / {} / {}, tie: {} / {} / {}",
+        //     gen.0, app.0, acc.0, gen.1, app.1, acc.1, gen.2, app.2, acc.2
+        // );
+        // eprintln!("score: {}", state.score);
+        // eprintln!("err: {:?}", err_cnt);
 
         self.io.output(&state);
     }

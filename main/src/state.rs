@@ -1,15 +1,47 @@
 // --- bandle on ---
+use crate::data::*;
 use crate::direction::*;
 use crate::io::*;
 use crate::operation::*;
+use crate::random::*;
 // --- bandle off ---
 
+#[derive(Debug, Clone)]
+pub struct Route {
+    pub t: usize,
+    pub start: (usize, usize),
+    pub nt: usize,
+    pub goal: (usize, usize),
+}
+
+impl Route {
+    fn new(t: usize, start: (usize, usize)) -> Self {
+        Self {
+            t,
+            start,
+            nt: t,
+            goal: start,
+        }
+    }
+
+    fn add(&mut self, io: &IO, d: Direction) {
+        if let Some(nxt) = io.next_pos(self.goal, d) {
+            self.goal = nxt;
+            self.nt += 1;
+        } else {
+            unreachable!("Route::add");
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct State {
     pub d: Vec<Direction>,
     // map[i][j] は空ではないことが保証される
     pub map: Vec<Vec<Vec<usize>>>,
+    pub low_routes: Vec<Route>,
     pub score_map: Vec<Vec<usize>>,
-    pub score: usize,
+    pub score: f64,
 }
 
 #[derive(Debug)]
@@ -21,20 +53,28 @@ pub enum Error {
 }
 
 impl State {
-    pub fn new(io: &IO, d: Vec<Direction>) -> Result<Self, Error> {
+    pub fn new(io: &IO, data: &Data, d: Vec<Direction>) -> Result<Self, Error> {
         let l = d.len();
 
         if l > 100000 {
             return Err(Error::TooLong);
         }
 
-        let map = {
+        let (low_routes, map) = {
+            let mut low_routes: Vec<Route> = vec![];
             let mut map = vec![vec![vec![]; io.n]; io.n];
             let mut now = (0, 0);
             for (t, &d) in d.iter().enumerate() {
                 if let Some(nxt) = io.next_pos(now, d) {
+                    map[nxt.0][nxt.1].push(t);
+                    if io.d[nxt.0][nxt.1] < Random::get(0..500) {
+                        if low_routes.is_empty() || low_routes.last().unwrap().nt != t - 1 {
+                            low_routes.push(Route::new(t, nxt));
+                        } else if low_routes.last().unwrap().nt == t - 1 {
+                            low_routes.last_mut().unwrap().add(io, d);
+                        }
+                    }
                     now = nxt;
-                    map[now.0][now.1].push(t);
                 } else {
                     return Err(Error::CannotMove);
                 }
@@ -42,7 +82,15 @@ impl State {
             if now != (0, 0) {
                 return Err(Error::NotGoal);
             }
-            map
+            let low_routes = low_routes
+                .iter()
+                .filter(|&r| {
+                    let d = r.nt - r.t;
+                    data.dist(r.start, r.goal) + 3 < d
+                })
+                .cloned()
+                .collect::<Vec<_>>();
+            (low_routes, map)
         };
 
         let score_map = {
@@ -68,12 +116,13 @@ impl State {
         let score = score_map
             .iter()
             .map(|row| row.iter().sum::<usize>())
-            .sum::<usize>()
-            / l;
+            .sum::<usize>() as f64
+            / l as f64;
 
         Ok(Self {
             d,
             map,
+            low_routes,
             score_map,
             score,
         })
@@ -83,28 +132,15 @@ impl State {
         self.d.iter().map(|&d| d.to_char()).collect()
     }
 
-    pub fn apply(&self, io: &IO, operation: &Operation) -> Result<State, Error> {
+    pub fn apply(&self, io: &IO, data: &Data, operation: &Operation) -> Result<State, Error> {
         match operation {
-            Operation::Add(op) => self.apply_add(io, op),
-            Operation::Del(op) => self.apply_del(io, op),
-            Operation::Tie(op) => self.apply_tie(io, op),
+            Operation::Del(op) => self.apply_del(io, data, op),
+            Operation::DelAdd(op) => self.apply_del_add(io, data, op),
+            Operation::Tie(op) => self.apply_tie(io, data, op),
         }
     }
 
-    fn apply_add(&self, io: &IO, operation: &AddOperation) -> Result<State, Error> {
-        let (t, d) = (operation.t, &operation.d);
-        let mut new_d = vec![];
-        for i in 0..self.d.len() {
-            if i == t + 1 {
-                new_d.extend_from_slice(&d);
-            } else {
-                new_d.push(self.d[i]);
-            }
-        }
-        State::new(io, new_d)
-    }
-
-    fn apply_del(&self, io: &IO, operation: &DelOperation) -> Result<State, Error> {
+    fn apply_del(&self, io: &IO, data: &Data, operation: &DelOperation) -> Result<State, Error> {
         let (l, r, d) = (operation.l, operation.r, operation.d);
         let mut new_d = vec![];
         for i in 0..self.d.len() {
@@ -115,28 +151,41 @@ impl State {
                 new_d.push(d);
             }
         }
-
-        // let mut now = (0, 0);
-        // for &d in &new_d {
-        //     if let Some(nxt) = io.next_pos(now, d) {
-        //         now = nxt;
-        //     } else {
-        //         unreachable!("State::apply_del cannot move");
-        //     }
-        // }
-
-        // if now != (0, 0) {
-        //     unreachable!("State::apply_del now != (0, 0)");
-        // }
-
-        State::new(io, new_d)
+        State::new(io, data, new_d)
     }
 
-    pub fn apply_tie(&self, io: &IO, operation: &TieOperation) -> Result<State, Error> {
+    fn apply_del_add(
+        &self,
+        io: &IO,
+        data: &Data,
+        operation: &DelAddOperation,
+    ) -> Result<State, Error> {
+        let (l, r, d) = (operation.l, operation.r, &operation.d);
+        let mut new_d = vec![];
+        for i in 0..self.d.len() {
+            if !(l + 1 <= i && i <= r) {
+                new_d.push(self.d[i]);
+            }
+            if i == l + 1 {
+                new_d.extend_from_slice(d);
+            }
+        }
+        State::new(io, data, new_d)
+    }
+
+    pub fn apply_tie(
+        &self,
+        io: &IO,
+        data: &Data,
+        operation: &TieOperation,
+    ) -> Result<State, Error> {
+        if operation.count == 1 {
+            return Ok(self.clone());
+        }
         let mut new_d = vec![];
         for _ in 0..operation.count {
             new_d.extend_from_slice(&self.d);
         }
-        State::new(io, new_d)
+        State::new(io, data, new_d)
     }
 }
